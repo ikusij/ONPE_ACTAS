@@ -51122,22 +51122,22 @@
     "totalActas": 10,
     "contabilizadas": 6,
     "actasContabilizadas": 60.0,
-    "enviadasJee": 0,
-    "actasEnviadasJee": 0.0,
-    "pendientesJee": 4,
-    "actasPendientesJee": 40.0,
+    "enviadasJee": 4,
+    "actasEnviadasJee": 40.0,
+    "pendientesJee": 0,
+    "actasPendientesJee": 0.0,
     "participantesOutput": [
       {
         "nombre": "RAFAEL BERNARDO LÓPEZ ALIAGA CAZORLA",
         "porcentajeVotos": 35.517,
         "votos": 206,
-        "votosAdicionales": 0
+        "votosAdicionales": 312
       },
       {
         "nombre": "ROBERTO HELBERT SANCHEZ PALOMINO",
         "porcentajeVotos": 1.379,
         "votos": 8,
-        "votosAdicionales": 0
+        "votosAdicionales": 12
       }
     ]
   },
