@@ -34480,24 +34480,24 @@
     "provincia": "LIMA",
     "departamento": "LIMA",
     "totalActas": 1163,
-    "contabilizadas": 1053,
-    "actasContabilizadas": 90.542,
-    "enviadasJee": 68,
-    "actasEnviadasJee": 5.847,
-    "pendientesJee": 42,
-    "actasPendientesJee": 3.611,
+    "contabilizadas": 1062,
+    "actasContabilizadas": 91.316,
+    "enviadasJee": 94,
+    "actasEnviadasJee": 8.083,
+    "pendientesJee": 7,
+    "actasPendientesJee": 0.601,
     "participantesOutput": [
       {
         "nombre": "RAFAEL BERNARDO LÓPEZ ALIAGA CAZORLA",
-        "porcentajeVotos": 10.749,
-        "votos": 27959,
-        "votosAdicionales": 1608
+        "porcentajeVotos": 10.758,
+        "votos": 28206,
+        "votosAdicionales": 2224
       },
       {
         "nombre": "ROBERTO HELBERT SANCHEZ PALOMINO",
-        "porcentajeVotos": 2.334,
-        "votos": 6070,
-        "votosAdicionales": 349
+        "porcentajeVotos": 2.34,
+        "votos": 6134,
+        "votosAdicionales": 483
       }
     ]
   },
@@ -39162,22 +39162,22 @@
     "totalActas": 32,
     "contabilizadas": 30,
     "actasContabilizadas": 93.75,
-    "enviadasJee": 0,
-    "actasEnviadasJee": 0.0,
-    "pendientesJee": 2,
-    "actasPendientesJee": 6.25,
+    "enviadasJee": 2,
+    "actasEnviadasJee": 6.25,
+    "pendientesJee": 0,
+    "actasPendientesJee": 0.0,
     "participantesOutput": [
       {
         "nombre": "ROBERTO HELBERT SANCHEZ PALOMINO",
         "porcentajeVotos": 26.005,
         "votos": 873,
-        "votosAdicionales": 0
+        "votosAdicionales": 114
       },
       {
         "nombre": "RAFAEL BERNARDO LÓPEZ ALIAGA CAZORLA",
         "porcentajeVotos": 3.336,
         "votos": 112,
-        "votosAdicionales": 0
+        "votosAdicionales": 14
       }
     ]
   },
