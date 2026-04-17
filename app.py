@@ -63,6 +63,22 @@ def render_aggregate(label, districts_data, actas_eliminadas_map):
                 f"— aventaja a **{s_name}** ({s_stats['votos']:,} actuales → {s_total:,} proyectados) "
                 f"por **{margin:,} votos**"
             )
+        SANCHEZ = "ROBERTO HELBERT SANCHEZ PALOMINO"
+        ALIAGA = "RAFAEL BERNARDO LÓPEZ ALIAGA CAZORLA"
+        sanchez_actas = aliaga_actas = 0
+        for ubigeo, data in districts_data.items():
+            adj = adjusted_participantes(data, actas_eliminadas_map.get(ubigeo, 0))
+            totals = {p["nombre"]: p["votos"] + p["votosAdicionales"] for p in adj}
+            s, a = totals.get(SANCHEZ, 0), totals.get(ALIAGA, 0)
+            if s > a:
+                sanchez_actas += data["enviadasJee"]
+            elif a > s:
+                aliaga_actas += data["enviadasJee"]
+        if sanchez_actas or aliaga_actas:
+            sc1, sc2 = st.columns(2)
+            sc1.metric("Actas JEE donde lidera Sánchez", f"{sanchez_actas:,}")
+            sc2.metric("Actas JEE donde lidera Aliaga", f"{aliaga_actas:,}")
+
         agg_p = [{"nombre": n, "votos": s["votos"], "votosAdicionales": s["votosAdicionales"]} for n, s in votos.items()]
         st.altair_chart(participantes_chart(agg_p), use_container_width=True)
 
