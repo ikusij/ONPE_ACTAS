@@ -34,7 +34,10 @@ def adjusted_participantes(data, actas_eliminadas):
         for p in data["participantesOutput"]
     ]
 
-def render_aggregate(label, districts_data, actas_eliminadas_map):
+def render_aggregate(label, districts_data, actas_eliminadas_map, toggle_key=None):
+    if toggle_key:
+        cancel_all = st.session_state.get(f"cancel_{toggle_key}", False)
+
     votos = defaultdict(lambda: {"votos": 0, "votosAdicionales": 0})
     total_eliminadas = sum(actas_eliminadas_map.get(u, 0) for u in districts_data)
     for ubigeo, data in districts_data.items():
@@ -45,7 +48,15 @@ def render_aggregate(label, districts_data, actas_eliminadas_map):
     projected = sorted(votos.items(), key=lambda x: x[1]["votos"] + x[1]["votosAdicionales"], reverse=True)
 
     with st.container(border=True):
-        st.caption(label)
+        hdr, tog = st.columns([6, 1])
+        hdr.caption(label)
+        if toggle_key:
+            toggled = tog.toggle("Cancelar enviadas", key=f"cancel_{toggle_key}", value=st.session_state.get(f"cancel_{toggle_key}", False))
+            if toggled != cancel_all:
+                new_val = int if toggled else lambda x: 0
+                for ubigeo, data in districts_data.items():
+                    st.session_state[ubigeo] = int(data["enviadasJee"]) if toggled else 0
+                st.rerun()
         gc1, gc2, gc3, gc4, gc5 = st.columns(5)
         gc1.metric("Total Actas", f"{sum(d['totalActas'] for d in districts_data.values()):,}")
         gc2.metric("Contabilizadas", f"{sum(d['contabilizadas'] for d in districts_data.values()):,}")
@@ -126,9 +137,23 @@ st.caption(f"Mostrando {len(filtered)} de {len(results)} distritos")
 # Read stepper values from session_state (available after first render)
 actas_eliminadas_map = {u: st.session_state.get(u, 0) for u in filtered}
 
+# Apply any active cancel toggles before rendering
+if st.session_state.get("cancel_global", False):
+    for u, d in filtered.items():
+        actas_eliminadas_map[u] = int(d["enviadasJee"])
+else:
+    groups_tmp = defaultdict(dict)
+    for u, d in filtered.items():
+        gk = "provincia" if (selected_prov and selected_prov != "Todas") or (selected_dept and selected_dept != "Todos") else "departamento"
+        groups_tmp[d[gk]][u] = d
+    for gname, gdists in groups_tmp.items():
+        if st.session_state.get(f"cancel_{gname}", False):
+            for u, d in gdists.items():
+                actas_eliminadas_map[u] = int(d["enviadasJee"])
+
 if filtered:
     # Top-level aggregate
-    render_aggregate("Agregado global", filtered, actas_eliminadas_map)
+    render_aggregate("Agregado global", filtered, actas_eliminadas_map, toggle_key="global")
 
     # Grouping
     if selected_prov and selected_prov != "Todas":
@@ -150,7 +175,7 @@ if filtered:
         st.markdown(f"### {group_name}")
 
         if use_toggle:
-            render_aggregate(f"Agregado de {group_name}", districts, actas_eliminadas_map)
+            render_aggregate(f"Agregado de {group_name}", districts, actas_eliminadas_map, toggle_key=group_name)
 
         items = list(districts.items())
 
