@@ -50,7 +50,7 @@ def render_aggregate(label, districts_data, actas_eliminadas_map):
         gc1.metric("Total Actas", f"{sum(d['totalActas'] for d in districts_data.values()):,}")
         gc2.metric("Contabilizadas", f"{sum(d['contabilizadas'] for d in districts_data.values()):,}")
         gc3.metric("Enviadas JEE", f"{sum(d['enviadasJee'] for d in districts_data.values()):,}")
-        gc4.metric("Pendientes JEE", f"{sum(d['pendientesJee'] for d in districts_data.values()):,}")
+        gc4.metric("Pendientes", f"{sum(d['pendientesJee'] for d in districts_data.values()):,}")
         gc5.metric("Actas eliminadas", f"{total_eliminadas:,}")
         if len(projected) >= 2:
             l_name, l_stats = projected[0]
@@ -161,7 +161,7 @@ if filtered:
 
                         c3, c4 = st.columns(2)
                         c3.metric("Enviadas JEE", f"{data['enviadasJee']} ({data['actasEnviadasJee']}%)")
-                        c4.metric("Pendientes JEE", f"{data['pendientesJee']} ({data['actasPendientesJee']}%)")
+                        c4.metric("Pendientes", f"{data['pendientesJee']} ({data['actasPendientesJee']}%)")
 
                         max_actas = int(data["enviadasJee"])
                         if max_actas > 0:
