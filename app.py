@@ -34,7 +34,7 @@ def adjusted_participantes(data, actas_eliminadas):
         for p in data["participantesOutput"]
     ]
 
-def render_aggregate(label, districts_data, actas_eliminadas_map, toggle_key=None):
+def render_aggregate(label, districts_data, actas_eliminadas_map, toggle_key=None, provincia_totales=None):
     if toggle_key:
         cancel_all = st.session_state.get(f"cancel_{toggle_key}", False)
 
@@ -57,12 +57,32 @@ def render_aggregate(label, districts_data, actas_eliminadas_map, toggle_key=Non
                 for ubigeo, data in districts_data.items():
                     st.session_state[ubigeo] = int(data["enviadasJee"]) if toggled else 0
                 st.rerun()
+        agg_total = sum(d['totalActas'] for d in districts_data.values())
+        agg_cont = sum(d['contabilizadas'] for d in districts_data.values())
+        agg_env = sum(d['enviadasJee'] for d in districts_data.values())
+        agg_pend = sum(d['pendientesJee'] for d in districts_data.values())
+
         gc1, gc2, gc3, gc4, gc5 = st.columns(5)
-        gc1.metric("Total Actas", f"{sum(d['totalActas'] for d in districts_data.values()):,}")
-        gc2.metric("Contabilizadas", f"{sum(d['contabilizadas'] for d in districts_data.values()):,}")
-        gc3.metric("Enviadas JEE", f"{sum(d['enviadasJee'] for d in districts_data.values()):,}")
-        gc4.metric("Pendientes", f"{sum(d['pendientesJee'] for d in districts_data.values()):,}")
+        gc1.metric("Total Actas", f"{agg_total:,}")
+        gc2.metric("Contabilizadas", f"{agg_cont:,}")
+        gc3.metric("Enviadas JEE", f"{agg_env:,}")
+        gc4.metric("Pendientes", f"{agg_pend:,}")
         gc5.metric("Actas eliminadas", f"{total_eliminadas:,}")
+
+        if provincia_totales:
+            pt = provincia_totales
+            d_total = agg_total - pt["totalActas"]
+            d_cont  = agg_cont  - pt["contabilizadas"]
+            d_env   = agg_env   - pt["enviadasJee"]
+            d_pend  = agg_pend  - pt["pendientesJee"]
+            has_diff = any(d != 0 for d in (d_total, d_cont, d_env, d_pend))
+            expander_label = "⚠️ Comparar con totales ONPE oficiales — hay diferencias" if has_diff else "Comparar con totales ONPE oficiales"
+            with st.expander(expander_label):
+                r1, r2, r3, r4 = st.columns(4)
+                r1.metric("Total Actas", f"{pt['totalActas']:,}", delta=f"{d_total:+,} vs distritos", delta_color="off")
+                r2.metric("Contabilizadas", f"{pt['contabilizadas']:,}", delta=f"{d_cont:+,} vs distritos", delta_color="off")
+                r3.metric("Enviadas JEE", f"{pt['enviadasJee']:,}", delta=f"{d_env:+,} vs distritos", delta_color="off")
+                r4.metric("Pendientes", f"{pt['pendientesJee']:,}", delta=f"{d_pend:+,} vs distritos", delta_color="off")
         if len(projected) >= 2:
             l_name, l_stats = projected[0]
             s_name, s_stats = projected[1]
@@ -95,6 +115,24 @@ def render_aggregate(label, districts_data, actas_eliminadas_map, toggle_key=Non
 
 with open("results_additional_votes.json") as f:
     results = json.load(f)
+
+try:
+    with open("results_provincia.json") as f:
+        results_provincia = json.load(f)
+except FileNotFoundError:
+    results_provincia = {}
+
+try:
+    with open("results_departamento.json") as f:
+        results_departamento = json.load(f)
+except FileNotFoundError:
+    results_departamento = {}
+
+try:
+    with open("results_global.json") as f:
+        results_global = json.load(f)
+except FileNotFoundError:
+    results_global = {}
 
 with open("hierarchy.json") as f:
     hierarchy = json.load(f)
@@ -153,7 +191,15 @@ else:
 
 if filtered:
     # Top-level aggregate
-    render_aggregate("Agregado global", filtered, actas_eliminadas_map, toggle_key="global")
+    if selected_prov and selected_prov != "Todas":
+        global_totales = results_provincia.get(f"{selected_prov} (PROVINCIA)")
+    elif selected_dept and selected_dept != "Todos":
+        global_totales = results_departamento.get(f"{selected_dept} (DEPARTAMENTO)")
+    else:
+        global_key = "PERU (AMBITO)" if scope == "PERU" else "EXTRANJERO (AMBITO)" if scope == "EXTRANJERO" else "TODOS (ELECCION)"
+        global_totales = results_global.get(global_key)
+    render_aggregate("Agregado global", filtered, actas_eliminadas_map, toggle_key="global",
+                     provincia_totales=global_totales)
 
     # Grouping
     if selected_prov and selected_prov != "Todas":
@@ -175,7 +221,8 @@ if filtered:
         st.markdown(f"### {group_name}")
 
         if use_toggle:
-            render_aggregate(f"Agregado de {group_name}", districts, actas_eliminadas_map, toggle_key=group_name)
+            render_aggregate(f"Agregado de {group_name}", districts, actas_eliminadas_map, toggle_key=group_name,
+                             provincia_totales=results_provincia.get(f"{group_name} (PROVINCIA)") if group_key == "provincia" else results_departamento.get(f"{group_name} (DEPARTAMENTO)") if group_key == "departamento" else None)
 
         items = list(districts.items())
 
